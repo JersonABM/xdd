@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografía: Attention Is All You Need - Jerson Baca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    
+    <!-- Configuración personalizada de Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        uc: {
+                            blue: '#002D62',   /* Azul Universidad Continental */
+                            gold: '#FDB913',   /* Amarillo/Oro Universidad Continental */
+                            dark: '#0B1120',   /* Fondo oscuro principal */
+                            card: '#111827'    /* Fondo oscuro de tarjetas */
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+        .math-font { font-family: 'Fira Code', monospace; }
+        
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .dark .glass {
+            background: rgba(17, 24, 39, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+            border-color: #FDB913;
+        }
+        
+        /* Animaciones secuenciales */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-uc-dark dark:text-slate-200 antialiased selection:bg-uc-gold selection:text-uc-blue min-h-screen flex flex-col relative">
+
+    <!-- Botón Toggle Modo Oscuro -->
+    <button onclick="toggleDarkMode()" class="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-uc-blue text-uc-gold shadow-2xl hover:scale-110 transition-transform duration-300 dark:bg-uc-gold dark:text-uc-blue focus:outline-none ring-4 ring-uc-blue/20 dark:ring-uc-gold/20">
+        <svg id="theme-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <!-- Icono Luna por defecto -->
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+    </button>
+
+    <div class="max-w-6xl mx-auto px-4 py-12 w-full">
+        
+        <!-- Header Hero -->
+        <header class="bg-uc-blue dark:bg-slate-900 rounded-[2.5rem] p-8 md:p-14 text-white shadow-2xl relative overflow-hidden mb-16 animate-fade-in-up border-b-4 border-uc-gold">
+            <!-- Background Image overlay -->
+            <div class="absolute inset-0 opacity-20 mix-blend-overlay">
+                <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1920&auto=format&fit=crop" alt="IA Abstract" class="w-full h-full object-cover">
+            </div>
+            <!-- Gradient overlays -->
+            <div class="absolute inset-0 bg-gradient-to-r from-uc-blue/90 to-transparent dark:from-slate-900/90 z-0"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
+                <div class="max-w-2xl space-y-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-block py-1 px-3 rounded-full bg-uc-gold text-uc-blue text-xs font-bold tracking-wider uppercase shadow-md">Paper Destacado NIPS 2017</span>
+                        <span class="text-xs font-mono text-slate-300">vaswani-et-al</span>
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">Attention Is <br><span class="text-uc-gold">All You Need</span></h1>
+                    <p class="text-lg md:text-xl text-slate-200 font-light max-w-xl">El documento científico que revolucionó el Procesamiento de Lenguaje Natural (NLP) y dio nacimiento a modelos como GPT y BERT.</p>
+                </div>
+                
+                <!-- Badge UC / Estudiante -->
+                <div class="glass rounded-2xl p-6 text-center shadow-lg border-white/20 animate-float hidden md:block">
+                    <div class="w-20 h-20 mx-auto bg-white rounded-full p-2 mb-3 shadow-inner">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_de_la_Universidad_Continental.svg/512px-Logo_de_la_Universidad_Continental.svg.png" alt="Universidad Continental" class="w-full h-full object-contain">
+                    </div>
+                    <p class="text-uc-gold font-bold text-sm tracking-wide uppercase">Presentado por</p>
+                    <p class="text-white font-semibold text-lg">Jerson Baca Medina</p>
+                    <p class="text-slate-300 text-xs mt-1">Ing. Sistemas e Informática</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- El Problema vs La Solución -->
+        <div class="grid md:grid-cols-2 gap-8 mb-16 opacity-0 animate-fade-in-up delay-100">
+            <!-- El Problema -->
+            <div class="bg-white dark:bg-uc-card rounded-3xl p-8 shadow-xl border border-slate-100 dark:border-slate-800 card-hover transition-all duration-300">
+                <div class="w-14 h-14 bg-red-50 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mb-6 text-red-500 border border-red-100 dark:border-red-800">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-3xl font-bold mb-4 text-slate-800 dark:text-white">El Paradigma Anterior</h2>
+                <p class="text-slate-600 dark:text-slate-400 mb-6 text-lg">Antes de 2017, la traducción automática y el NLP dependían de <strong>Redes Neuronales Recurrentes (RNNs)</strong> y LSTMs.</p>
+                <ul class="space-y-4 text-base text-slate-600 dark:text-slate-400">
+                    <li class="flex items-start"><span class="text-red-500 mr-3 mt-1 text-xl">✗</span> <span><strong>Procesamiento secuencial:</strong> Analiza palabra por palabra, lo que impide paralelizar en GPUs modernas.</span></li>
+                    <li class="flex items-start"><span class="text-red-500 mr-3 mt-1 text-xl">✗</span> <span><strong>Olvido de contexto:</strong> Dificultad para recordar información importante al principio de párrafos largos.</span></li>
+                </ul>
+            </div>
+
+            <!-- La Solución -->
+            <div class="bg-uc-blue dark:bg-uc-card rounded-3xl p-8 shadow-xl border border-uc-blue dark:border-uc-gold/30 card-hover transition-all duration-300 relative overflow-hidden text-white">
+                <div class="absolute -right-10 -top-10 opacity-10">
+                    <svg class="w-64 h-64 text-uc-gold" fill="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <div class="w-14 h-14 bg-uc-gold rounded-2xl flex items-center justify-center mb-6 text-uc-blue font-bold text-2xl relative z-10 shadow-lg">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-3xl font-bold mb-4 text-white relative z-10">La Solución: El Transformer</h2>
+                <p class="text-blue-100 dark:text-slate-300 mb-6 text-lg relative z-10">Una arquitectura basada <strong>exclusivamente en mecanismos de atención</strong>. Se deshace por completo de la recurrencia.</p>
+                <ul class="space-y-4 text-base text-blue-50 dark:text-slate-300 relative z-10">
+                    <li class="flex items-start"><span class="text-uc-gold mr-3 mt-1 text-xl">✓</span> <span><strong>Altamente paralelizable:</strong> Entrena muchísimo más rápido aprovechando hardware moderno.</span></li>
+                    <li class="flex items-start"><span class="text-uc-gold mr-3 mt-1 text-xl">✓</span> <span><strong>Atención Global:</strong> Cada palabra se conecta directamente con todas las demás de la oración simultáneamente.</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Componentes Core -->
+        <div class="text-center mb-12 opacity-0 animate-fade-in-up delay-200">
+            <h2 class="text-4xl font-extrabold text-slate-800 dark:text-white mb-4">Los 3 Pilares del Modelo</h2>
+            <div class="w-24 h-1.5 bg-uc-gold mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="space-y-8 mb-20 opacity-0 animate-fade-in-up delay-200">
+            
+            <!-- Pilar 1 -->
+            <div class="bg-white dark:bg-uc-card rounded-3xl shadow-lg overflow-hidden flex flex-col md:flex-row border border-slate-100 dark:border-slate-800 group transition-colors">
+                <div class="bg-slate-100 dark:bg-slate-800/50 md:w-5/12 p-8 flex flex-col justify-center border-r border-slate-200 dark:border-slate-700">
+                    <div class="w-12 h-12 bg-uc-blue dark:bg-uc-gold rounded-full flex items-center justify-center text-white dark:text-uc-blue font-bold text-xl mb-4 shadow-md">1</div>
+                    <h3 class="text-2xl font-bold mb-3 text-uc-blue dark:text-uc-gold">Scaled Dot-Product Attention</h3>
+                    <p class="text-slate-600 dark:text-slate-400">El motor matemático. Calcula qué tanta atención debe prestar una palabra al resto de las palabras en la oración.</p>
+                </div>
+                <div class="md:w-7/12 p-8 flex flex-col justify-center items-center">
+                    <div class="bg-slate-800 dark:bg-slate-900 p-6 rounded-2xl shadow-inner math-font text-lg text-uc-gold w-full text-center overflow-x-auto border border-slate-700">
+                        Attention(Q, K, V) = softmax<span class="text-white">(</span><span class="text-white border-b border-slate-500 pb-1">QK<sup class="text-xs">T</sup></span> / <span class="text-white pt-1">√d<sub class="text-xs">k</sub></span><span class="text-white">)</span> V
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 mt-6 w-full max-w-md">
+                        <div class="text-center p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-800/30">
+                            <strong class="block">Q (Query)</strong> Qué busco
+                        </div>
+                        <div class="text-center p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-100 dark:border-blue-800/30">
+                            <strong class="block">K (Key)</strong> Qué tengo
+                        </div>
+                        <div class="text-center p-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800/30">
+                            <strong class="block">V (Value)</strong> El contenido
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilar 2 -->
+            <div class="bg-white dark:bg-uc-card rounded-3xl shadow-lg overflow-hidden flex flex-col md:flex-row border border-slate-100 dark:border-slate-800">
+                <div class="md:w-1/2 p-10 order-2 md:order-1 flex flex-col justify-center">
+                    <div class="w-12 h-12 bg-uc-blue dark:bg-uc-gold rounded-full flex items-center justify-center text-white dark:text-uc-blue font-bold text-xl mb-4 shadow-md">2</div>
+                    <h3 class="text-2xl font-bold mb-4 text-uc-blue dark:text-uc-gold">Multi-Head Attention</h3>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                        En lugar de calcular la atención una sola vez, el modelo divide los datos y calcula la atención <strong>múltiples veces en paralelo</strong> (cabezales). 
+                    </p>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border-l-4 border-uc-gold">
+                        Esto permite que un cabezal se enfoque en la gramática, otro en el sujeto, otro en el verbo, capturando relaciones complejas simultáneamente.
+                    </p>
+                </div>
+                <div class="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 md:w-1/2 p-8 order-1 md:order-2 flex items-center justify-center relative border-l border-slate-200 dark:border-slate-700">
+                    <!-- Representación Visual Multihead -->
+                    <div class="relative w-full max-w-[280px] aspect-square flex items-center justify-center">
+                        <div class="absolute inset-0 border-4 border-uc-blue/20 dark:border-uc-gold/20 rounded-full animate-ping opacity-50"></div>
+                        <div class="w-36 h-36 bg-white dark:bg-slate-800 border-2 border-uc-blue dark:border-uc-gold rounded-full flex flex-col items-center justify-center shadow-2xl z-10">
+                            <span class="text-uc-blue dark:text-uc-gold font-bold text-xl">Concat</span>
+                            <span class="text-slate-500 dark:text-slate-400 text-sm mt-1 font-mono">h = 8 heads</span>
+                        </div>
+                        <!-- Nodos alrededor -->
+                        <div class="absolute top-2 w-14 h-14 bg-uc-blue text-white dark:bg-uc-gold dark:text-uc-blue rounded-full flex items-center justify-center text-sm font-bold shadow-lg shadow-uc-blue/30 transition-transform hover:scale-110">H1</div>
+                        <div class="absolute bottom-2 w-14 h-14 bg-uc-blue text-white dark:bg-uc-gold dark:text-uc-blue rounded-full flex items-center justify-center text-sm font-bold shadow-lg transition-transform hover:scale-110">H2</div>
+                        <div class="absolute left-2 w-14 h-14 bg-uc-blue text-white dark:bg-uc-gold dark:text-uc-blue rounded-full flex items-center justify-center text-sm font-bold shadow-lg transition-transform hover:scale-110">H3</div>
+                        <div class="absolute right-2 w-14 h-14 bg-uc-blue text-white dark:bg-uc-gold dark:text-uc-blue rounded-full flex items-center justify-center text-sm font-bold shadow-lg transition-transform hover:scale-110">...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilar 3 -->
+            <div class="bg-white dark:bg-uc-card rounded-3xl shadow-lg overflow-hidden flex flex-col md:flex-row border border-slate-100 dark:border-slate-800">
+                <div class="bg-slate-100 dark:bg-slate-800/50 md:w-5/12 p-8 flex flex-col justify-center border-r border-slate-200 dark:border-slate-700">
+                    <div class="w-12 h-12 bg-uc-blue dark:bg-uc-gold rounded-full flex items-center justify-center text-white dark:text-uc-blue font-bold text-xl mb-4 shadow-md">3</div>
+                    <h3 class="text-2xl font-bold mb-3 text-uc-blue dark:text-uc-gold">Positional Encoding</h3>
+                    <p class="text-slate-600 dark:text-slate-400">El "reloj" interno. Al no leer de izquierda a derecha secuencialmente, inyecta información matemática sobre la posición de cada palabra.</p>
+                </div>
+                <div class="md:w-7/12 p-8 flex flex-col justify-center items-center relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10 dark:opacity-5" style="background-image: radial-gradient(#002D62 1px, transparent 1px); background-size: 20px 20px;"></div>
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 z-10 w-full">
+                        <div class="flex flex-col gap-4 text-center">
+                            <div class="math-font text-slate-800 dark:text-slate-200 text-lg">PE(pos, 2i) = sen(pos / 10000<sup>2i/d</sup>)</div>
+                            <div class="w-full h-px bg-slate-200 dark:bg-slate-700"></div>
+                            <div class="math-font text-slate-800 dark:text-slate-200 text-lg">PE(pos, 2i+1) = cos(pos / 10000<sup>2i/d</sup>)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arquitectura Macro con Imagen y Diagramas CSS -->
+        <div class="mb-20 opacity-0 animate-fade-in-up delay-300">
+            <h2 class="text-4xl font-extrabold text-center mb-10 text-slate-800 dark:text-white">La Arquitectura Global</h2>
+            
+            <div class="grid lg:grid-cols-2 gap-10 items-center">
+                
+                <!-- Imagen de la Arquitectura -->
+                <div class="bg-white dark:bg-uc-card p-4 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center">
+                    <!-- Se usa una imagen de referencia genérica de arquitectura transformer -->
+                    <div class="relative w-full rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-800 flex justify-center p-4">
+                        <img src="https://machinelearningmastery.com/wp-content/uploads/2021/08/attention_research_1.png" alt="Arquitectura del Modelo Transformer" class="max-h-[500px] object-contain rounded-xl shadow-sm mix-blend-multiply dark:mix-blend-normal dark:invert-[.8] dark:hue-rotate-180 transition-all duration-300">
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-4 text-center italic">Figura 1: Arquitectura Transformer (Encoder izquierdo, Decoder derecho).</p>
+                </div>
+
+                <!-- Esquema Lógico -->
+                <div class="space-y-6">
+                    <!-- Encoder Resumen -->
+                    <div class="bg-white dark:bg-uc-card rounded-2xl p-6 shadow-lg border-l-4 border-uc-blue dark:border-uc-gold">
+                        <h3 class="text-2xl font-bold text-uc-blue dark:text-uc-gold mb-3 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            El Encoder
+                        </h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-4">Consta de una pila de 6 capas idénticas. Su objetivo es mapear la secuencia de entrada en representaciones continuas llenas de contexto.</p>
+                        <div class="flex gap-2 text-xs font-mono">
+                            <span class="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded text-slate-700 dark:text-slate-300">Self-Attention</span>
+                            <span class="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded text-slate-700 dark:text-slate-300">Feed Forward</span>
+                        </div>
+                    </div>
+
+                    <!-- Decoder Resumen -->
+                    <div class="bg-white dark:bg-uc-card rounded-2xl p-6 shadow-lg border-l-4 border-purple-600 dark:border-purple-400">
+                        <h3 class="text-2xl font-bold text-purple-700 dark:text-purple-400 mb-3 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            El Decoder
+                        </h3>
+                        <p class="text-slate-600 dark:text-slate-400 mb-4">También apila 6 capas, pero genera la salida palabra por palabra (auto-regresivo). Tiene una capa extra de atención para mirar lo que procesó el Encoder.</p>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono">
+                            <span class="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded text-slate-700 dark:text-slate-300">Masked Attention</span>
+                            <span class="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded text-slate-700 dark:text-slate-300">Encoder-Decoder Attention</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados Impactantes -->
+        <div class="bg-gradient-to-r from-uc-blue to-blue-900 rounded-[2.5rem] p-10 md:p-14 text-white shadow-2xl relative overflow-hidden opacity-0 animate-fade-in-up delay-300 border border-uc-blue">
+            <div class="absolute right-0 top-0 w-1/2 h-full bg-uc-gold/10 skew-x-12 transform origin-top-right"></div>
+            
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-10 text-center relative z-10 text-white">Resultados Rompedores (WMT 2014)</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6 text-center relative z-10">
+                <!-- Stat 1 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-colors">
+                    <div class="text-5xl font-black text-uc-gold mb-3">28.4</div>
+                    <div class="text-base font-semibold text-white mb-2">Puntaje BLEU</div>
+                    <div class="text-sm text-blue-200">Inglés a Alemán</div>
+                    <div class="mt-4 pt-4 border-t border-white/20 text-xs text-blue-100">+2 BLEU superando al mejor ensamble existente.</div>
+                </div>
+                <!-- Stat 2 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-colors">
+                    <div class="text-5xl font-black text-uc-gold mb-3">41.0</div>
+                    <div class="text-base font-semibold text-white mb-2">Puntaje BLEU</div>
+                    <div class="text-sm text-blue-200">Inglés a Francés</div>
+                    <div class="mt-4 pt-4 border-t border-white/20 text-xs text-blue-100">Nuevo récord SOTA para un modelo individual.</div>
+                </div>
+                <!-- Stat 3 -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover:bg-white/20 transition-colors">
+                    <div class="text-5xl font-black text-uc-gold mb-3">3.5 <span class="text-2xl">Días</span></div>
+                    <div class="text-base font-semibold text-white mb-2">Entrenamiento</div>
+                    <div class="text-sm text-blue-200">En 8 GPUs P100</div>
+                    <div class="mt-4 pt-4 border-t border-white/20 text-xs text-blue-100">Una fracción mínima del costo computacional anterior.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creditos / Autor (Estilo Identíficador Premium) -->
+        <div class="mt-16 bg-white dark:bg-uc-card rounded-[2rem] p-1 shadow-2xl bg-gradient-to-r from-uc-blue via-blue-500 to-uc-gold dark:from-uc-gold dark:via-orange-500 dark:to-uc-blue opacity-0 animate-fade-in-up delay-300 transform hover:-translate-y-2 transition-transform duration-300">
+            <div class="bg-white dark:bg-slate-900 rounded-[1.9rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 h-full">
+                
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+                    <!-- Avatar / Logo Rediseñado -->
+                    <div class="relative group">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-uc-blue to-uc-gold rounded-full blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                        <div class="relative w-28 h-28 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center border-4 border-slate-50 dark:border-slate-700 shadow-xl overflow-hidden p-3">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_de_la_Universidad_Continental.svg/512px-Logo_de_la_Universidad_Continental.svg.png" alt="Universidad Continental" class="object-contain w-full h-full">
+                        </div>
+                        <div class="absolute -bottom-2 -right-2 bg-uc-gold text-uc-blue p-2 rounded-full border-2 border-white dark:border-slate-900 shadow-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center md:text-left space-y-2">
+                        <div class="inline-block py-1 px-3 rounded-md bg-uc-blue/10 dark:bg-uc-gold/20 text-uc-blue dark:text-uc-gold text-xs font-bold tracking-wider uppercase mb-1">Autor del Proyecto</div>
+                        <h3 class="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">Baca Medina, Jerson Alejandro</h3>
+                        <p class="text-lg text-slate-600 dark:text-slate-300 font-medium">Estudiante Destacado & Desarrollador Web</p>
+                        <div class="pt-2 flex flex-col sm:flex-row gap-2 sm:gap-4 items-center md:items-start justify-center md:justify-start">
+                            <span class="flex items-center text-sm font-semibold text-uc-blue dark:text-uc-gold bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                                🎓 Universidad Continental
+                            </span>
+                            <span class="flex items-center text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                                💻 E.P. Ing. de Sistemas e Informática
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hidden lg:flex flex-col items-end text-right border-l-2 border-slate-100 dark:border-slate-800 pl-8">
+                    <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?q=80&w=200&auto=format&fit=crop" alt="Code" class="w-16 h-16 rounded-xl object-cover mb-3 opacity-80 shadow-md">
+                    <span class="text-sm font-bold text-slate-800 dark:text-white">Diseño UI/UX Interactivo</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 mt-1">HTML5 + Tailwind CSS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Footer -->
+        <footer class="mt-12 text-center text-slate-500 dark:text-slate-500 text-sm font-medium">
+            <p>Infografía basada en el documento: <a href="#" class="text-uc-blue dark:text-uc-gold hover:underline">Attention Is All You Need (Vaswani et al., 2017)</a></p>
+            <p class="mt-2 text-xs opacity-70">Desarrollado en Perú • 2026</p>
+        </footer>
+
+    </div>
+
+    <!-- Script para Modo Oscuro -->
+    <script>
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            html.classList.toggle('dark');
+            
+            // Cambiar icono
+            if(html.classList.contains('dark')) {
+                // Icono Sol para cambiar a modo claro
+                icon.innerHTML = '<path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.366a1 1 0 011.415 0l.708.707a1 1 0 11-1.414 1.415l-.707-.708a1 1 0 010-1.414zm3.78 4.634a1 1 0 110 2h-1a1 1 0 110-2h1zm-1.414 4.22a1 1 0 010 1.415l-.707.707a1 1 0 11-1.415-1.414l.707-.707a1 1 0 011.415 0zM10 15a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.414a1 1 0 010-1.415l.708-.707a1 1 0 111.414 1.415l-.708.707a1 1 0 01-1.414 0zM4 10a1 1 0 11-2 0 1 1 0 012 0zm1.414-4.22a1 1 0 011.415 0l.707.708a1 1 0 11-1.414 1.414l-.707-.708a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path>';
+            } else {
+                // Icono Luna para cambiar a modo oscuro
+                icon.innerHTML = '<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>';
+            }
+        }
+
+        // Detectar preferencia del sistema por defecto
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+            const icon = document.getElementById('theme-icon');
+            if(icon) icon.innerHTML = '<path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.366a1 1 0 011.415 0l.708.707a1 1 0 11-1.414 1.415l-.707-.708a1 1 0 010-1.414zm3.78 4.634a1 1 0 110 2h-1a1 1 0 110-2h1zm-1.414 4.22a1 1 0 010 1.415l-.707.707a1 1 0 11-1.415-1.414l.707-.707a1 1 0 011.415 0zM10 15a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.414a1 1 0 010-1.415l.708-.707a1 1 0 111.414 1.415l-.708.707a1 1 0 01-1.414 0zM4 10a1 1 0 11-2 0 1 1 0 012 0zm1.414-4.22a1 1 0 011.415 0l.707.708a1 1 0 11-1.414 1.414l-.707-.708a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z" clip-rule="evenodd"></path>';
+        }
+    </script>
+</body>
+</html>
